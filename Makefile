@@ -1,16 +1,16 @@
-# Compiler settings
+# Compiler settings (console可改為window)
 CXX = g++ --std=c++17
-CXXFLAGS = -w -Wl,--stack,67108864 -Wl,-subsystem,console 
+CXXFLAGS = -w -Wl, -Wl,-subsystem,console 
 
-# SDL paths (不知為何，在我的電腦中只能使用相對路徑)
-SDL_INCLUDE = -I ../../projects/SDL/SDL3-3.2.12/x86_64-w64-mingw32/include -I ../../projects/SDL/SDL3_image-3.2.4/x86_64-w64-mingw32/include
-SDL_LIB = -L ../../projects/SDL/SDL3-3.2.12/x86_64-w64-mingw32/lib -L ../../projects/SDL/SDL3_image-3.2.4/x86_64-w64-mingw32/lib
+# SDL paths (請確認路徑中無中文)(mixer的git-hash: daf0503)
+SDL_INCLUDE = -I local/SDL3-3.2.12/x86_64-w64-mingw32/include -I local/SDL3_image-3.2.4/x86_64-w64-mingw32/include -I local/SDL3_mixer/include
+SDL_LIB = -L local/SDL3-3.2.12/x86_64-w64-mingw32/lib -L local/SDL3_image-3.2.4/x86_64-w64-mingw32/lib -L local/SDL3_mixer/lib
 
 # Libraries (請記得修改環境變數)
 LIB = -lSDL3 -lSDL3_image 
 
 # Target executable name
-TARGET = test
+TARGET = Ghost-sudoku
 
 # Source files
 SRCS = DLX.cpp mSDL.cpp main.cpp
