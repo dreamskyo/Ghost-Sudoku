@@ -80,13 +80,13 @@ vector<SDL_Texture*>* mSDL::getTexture( int color ){
     }
 }
 
-bool Init( SDL_Window* &gWindow, SDL_Renderer* &Renderer )
+bool InitWindow( SDL_Window* &Window, SDL_Renderer* &Renderer )
 {
     if( !SDL_InitSubSystem( SDL_INIT_VIDEO ) )
     {
-        SDL_Log( "Init error: %s\n", SDL_GetError() );
+        SDL_Log( "System error: %s\n", SDL_GetError() );
     }
-    else if( !SDL_CreateWindowAndRenderer( "Ghost-sudoku", ScreenWidth, ScreenHeight, 0, &gWindow, &Renderer ) )
+    else if( !SDL_CreateWindowAndRenderer( "Ghost-sudoku", ScreenWidth, ScreenHeight, 0, &Window, &Renderer ) )
     {
         SDL_Log( "Window error: %s\n", SDL_GetError() );
     }
@@ -95,6 +95,34 @@ bool Init( SDL_Window* &gWindow, SDL_Renderer* &Renderer )
         return true;
     }
     return false;
+}
+
+bool InitAudio( SDL_AudioDeviceID &Audio )
+{
+    if( !SDL_InitSubSystem( SDL_INIT_AUDIO ) )
+    {
+        SDL_Log( "System error: %s\n", SDL_GetError() );
+        return false;
+    }
+
+    SDL_AudioSpec setting;
+    SDL_zero( setting );
+    setting.format = SDL_AUDIO_F32;
+    setting.channels = 2;
+    setting.freq = 44100;
+
+    Audio = SDL_OpenAudioDevice( SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &setting );
+    if( Audio == 0 )
+    {
+        SDL_Log( "Audio error: %s\n", SDL_GetError() );
+        return false;
+    }
+    else if( !Mix_OpenAudio( Audio, nullptr ) )
+    {
+        printf( "Mixer error: %s\n", SDL_GetError() );
+        return false;
+    }
+    return true;
 }
 
 bool LoadAllPNGS( mSDL &SDL_Object, SDL_Renderer* &Renderer )
@@ -111,12 +139,50 @@ bool LoadAllPNGS( mSDL &SDL_Object, SDL_Renderer* &Renderer )
     return success;
 }
 
-void Close( mSDL &SDL_Object, SDL_Window* &gWindow, SDL_Renderer* &Renderer )
+bool LoadAllAudios( vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
 {
+    for(int i=0;i<2;++i)
+    {
+        Musics[i] = Mix_LoadMUS( MusicPath[i].c_str() );
+        if( Musics[i] == nullptr )
+        {
+            return false;
+        }
+    }
+
+    for(int i=0;i<0;++i)
+    {
+        Chunks[i] = Mix_LoadWAV( ChunkPath[i].c_str() );
+        if( Chunks[i] == nullptr )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_AudioDeviceID &Audio, vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
+{
+    for(int i=0;i<2;++i)
+    {
+        Mix_FreeMusic( Musics[i] );
+        Musics[i] = nullptr;
+    }
+
+    for(int i=0;i<0;++i)
+    {
+        Mix_FreeChunk( Chunks[i] );
+        Chunks[i] = nullptr;
+    }
+
     SDL_Object.TextureDestroy();
     SDL_DestroyRenderer( Renderer );
-    SDL_DestroyWindow( gWindow );
+    SDL_DestroyWindow( Window );
+    SDL_CloseAudioDevice( Audio );
     Renderer = nullptr;
-    gWindow = nullptr;
+    Window = nullptr;
+    Audio = 0;
+    Mix_Quit();
     SDL_Quit();
 }

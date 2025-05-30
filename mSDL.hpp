@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #include <vector>
 #include <string>
 using namespace std;
@@ -18,31 +19,36 @@ const float TextureWidth = 100.f;
 const float TextureHeight = 100.f; // 修正拼寫錯誤
 
 const vector<string> WhiteNumberPath{
-    "ghost-and-mirror/break.png",
-    "ghost-and-mirror/white1.png",
-    "ghost-and-mirror/white2.png",
-    "ghost-and-mirror/white3.png",
-    "ghost-and-mirror/white4.png",
-    "ghost-and-mirror/white5.png",
-    "ghost-and-mirror/white6.png",
-    "ghost-and-mirror/white7.png",
-    "ghost-and-mirror/white8.png",
-    "ghost-and-mirror/white9.png"
+    "element/break.png",
+    "element/white1.png",
+    "element/white2.png",
+    "element/white3.png",
+    "element/white4.png",
+    "element/white5.png",
+    "element/white6.png",
+    "element/white7.png",
+    "element/white8.png",
+    "element/white9.png"
 };
 const vector<string> RedNumberPath{
-    "ghost-and-mirror/break.png",
-    "ghost-and-mirror/red1.png",
-    "ghost-and-mirror/red2.png",
-    "ghost-and-mirror/red3.png",
-    "ghost-and-mirror/red4.png",
-    "ghost-and-mirror/red5.png",
-    "ghost-and-mirror/red6.png",
-    "ghost-and-mirror/red7.png",
-    "ghost-and-mirror/red8.png",
-    "ghost-and-mirror/red9.png"
+    "element/break.png",
+    "element/red1.png",
+    "element/red2.png",
+    "element/red3.png",
+    "element/red4.png",
+    "element/red5.png",
+    "element/red6.png",
+    "element/red7.png",
+    "element/red8.png",
+    "element/red9.png"
 };
+const vector<string> MusicPath{
+    "element/WhatHappen.mp3",
+    "element/WhosThere.mp3"
+};
+const vector<string> ChunkPath{
 
-/* Class Prototypes */
+};
 class mSDL
 {
     
@@ -62,8 +68,10 @@ public:
 
 };
 
-bool Init( SDL_Window* &gWindow, SDL_Renderer* &Renderer );
+bool InitWindow( SDL_Window* &Window, SDL_Renderer* &Renderer );
+bool InitAudio( SDL_AudioDeviceID &Audio );
 bool LoadAllPNGS( mSDL &SDL_Object, SDL_Renderer* &Renderer );
-void Close( mSDL &SDL_Object, SDL_Window* &gWindow, SDL_Renderer* &Renderer );
+bool LoadAllAudios( vector<Mix_Music*> &musics, vector<Mix_Chunk*> &chunks );
+void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_AudioDeviceID &Audio, vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks );
 
 #endif

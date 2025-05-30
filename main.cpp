@@ -11,7 +11,8 @@ int main( int argc, char* args[0] )
 
     enum ErrorCode {
         SUCCESS,
-        SDL_INIT_FAILED,
+        SDL_WINDOW_FAILED,
+        SDL_AUDIO_FAILED,
         SUDOKU_GEN_FAILED,
         RESOURCE_LOAD_FAILED
     };
@@ -21,29 +22,48 @@ int main( int argc, char* args[0] )
 
     SDL_Window* Window = nullptr;
     SDL_Renderer* Renderer = nullptr;
+    SDL_AudioDeviceID Audio = 0;
     mSDL SDL_Object;
 
     vector<vector<SDL_FRect>> TexturePosition(9,vector<SDL_FRect>(9));
+    vector<Mix_Music*> Musics(2);
+    vector<Mix_Chunk*> Chunks;
+    int NowMusic = 0;
 
-    if( !Init( Window, Renderer ) )
+    if( !InitWindow( Window, Renderer ) )
     {
         SDL_Log( "無法建立視窗!\n" );
-        Close( SDL_Object, Window, Renderer );
-        return SDL_INIT_FAILED;
+        Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
+        return SDL_WINDOW_FAILED;
+    }
+
+    if( !InitAudio( Audio ) )
+    {
+        SDL_Log( "無法設置音訊!\n" );
+        Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
+        return SDL_AUDIO_FAILED;
     }
     
     if(!solver.DLXmain()){
         SDL_Log("產生數獨失敗!\n");
-        Close( SDL_Object, Window, Renderer );
+        Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
         return SUDOKU_GEN_FAILED;
     }
         
     if( !LoadAllPNGS( SDL_Object, Renderer ) )
     {
         SDL_Log( "請檢查圖片路徑!\n" );
-        Close( SDL_Object, Window, Renderer );
+        Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
         return RESOURCE_LOAD_FAILED;
     }
+
+    if( !LoadAllAudios( Musics, Chunks ) )
+    {
+        SDL_Log( "請檢查音訊路徑!\n" );
+        Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
+        return RESOURCE_LOAD_FAILED;
+    }
+    
 
     for(int i=0;i<9;++i)
     {
@@ -53,16 +73,23 @@ int main( int argc, char* args[0] )
         }
     }
 
+    srand( time( NULL ) );
+    NowMusic = rand()%2;
+
     bool quit = false;
     SDL_Event e;
     SDL_zero( e );
-    
-    while( quit == false )
-    {
 
+    while( quit == false )
+    {   
         while( SDL_PollEvent( &e ) )
         {
             quit = ( e.type == SDL_EVENT_QUIT );
+        }
+
+        if(Mix_PlayingMusic() == 0){
+            Mix_PlayMusic( Musics[NowMusic%2], 0 );
+            ++NowMusic;
         }
 
         SDL_SetRenderDrawColor( Renderer, 0x00, 0x00, 0x00, 0xFF );
@@ -80,6 +107,6 @@ int main( int argc, char* args[0] )
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     } 
 
-    Close( SDL_Object, Window, Renderer );
+    Close( SDL_Object, Window, Renderer, Audio, Musics, Chunks );
     return SUCCESS;
 }
