@@ -1,5 +1,5 @@
+
 #include "DLX.hpp"
-#include <algorithm>
 #include <SDL3/SDL.h>
 using namespace std;
 

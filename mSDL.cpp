@@ -4,7 +4,9 @@
 #include <ctime>
 using namespace std;
 
-mSDL::mSDL() {
+mSDL::mSDL()
+{
+    MirrorTexture.assign(1,nullptr);
     WhiteTexture.assign(10,nullptr);
     RedTexture.assign(10,nullptr);
     SudokuColor.assign(9,vector<int>(9));
@@ -51,20 +53,34 @@ void mSDL::TextureDestroy()
     }
 }
 
-void mSDL::render( SDL_Renderer* &Renderer, vector<vector<int>> &answer, vector<vector<SDL_FRect>> &TexturePosition, int i, int j )
+void mSDL::render( SDL_Renderer* &Renderer, vector<vector<int>> &Answer, vector<vector<SDL_FRect>> &TexturePosition, int i, int j )
 {
     switch( SudokuColor[i][j] )
     {   
     case white:
-        SDL_RenderTexture( Renderer, RedTexture[answer[i][j]] , nullptr, &TexturePosition[i][j] );
+        SDL_RenderTexture( Renderer, RedTexture[ Answer[i][j] ] , nullptr, &TexturePosition[i][j] );
         break;
     case red:
-        SDL_RenderTexture( Renderer, WhiteTexture[answer[i][j]] , nullptr, &TexturePosition[i][j] );
+        SDL_RenderTexture( Renderer, WhiteTexture[ Answer[i][j] ] , nullptr, &TexturePosition[i][j] );
         break;
     default:
         SDL_Log("Render color error\n");
     }
     SudokuColor[i][j] = rand() & 1;
+}
+
+void mSDL::reset( SDL_Renderer* &Renderer, vector<vector<int>> &Answer, vector<vector<SDL_FRect>> &TexturePosition )
+{
+    for(int i=0;i<9;++i)
+    {
+        for(int j=0;j<9;++j)
+        {   
+            if( Answer[i][j] != 0 )
+            {
+                SDL_RenderTexture( Renderer, MirrorTexture[ 0 ] , nullptr, &TexturePosition[i][j] );
+            }
+        }
+    }
 }
 
 vector<SDL_Texture*>* mSDL::getTexture( int color ){
@@ -75,8 +91,7 @@ vector<SDL_Texture*>* mSDL::getTexture( int color ){
     case red:
         return &RedTexture;
     default:
-        SDL_Log("Wrong Texture!");
-        return nullptr;
+        return &MirrorTexture;
     }
 }
 
@@ -136,6 +151,9 @@ bool LoadAllPNGS( mSDL &SDL_Object, SDL_Renderer* &Renderer )
             break;
         }
     }
+
+    success &= SDL_Object.SurfaceLoad( Renderer, *( SDL_Object.getTexture( -1 ) ), MirrorPath, 0 );
+
     return success;
 }
 
@@ -162,35 +180,37 @@ bool LoadAllAudios( vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
     return true;
 }
 
-void MouseClick( vector<vector<SDL_FRect>> &TexturePosition, vector<vector<int>> &Answer, set<pair<int,int>> &Breaked, vector<Mix_Chunk*> &Chunks )
+bool MouseClick( vector<vector<SDL_FRect>> &TexturePosition, pair<int,int> &ErrorPosition, vector<vector<int>> &Answer, set<pair<int,int>> &Breaked, vector<Mix_Chunk*> &Chunks )
 {
     float x = -1.f, y = -1.f;
     SDL_GetMouseState( &x, &y );
     if( x < 0 || y < 0 || x > ScreenWidth || y > ScreenHeight )
     {
         SDL_Log("Out of screen!\n");
-        return;
+        return false;
     }
 
-    for(int i=0;i<9;++i)
+    if( x > TexturePosition[ ErrorPosition.first ][ ErrorPosition.second ].x &&
+        x < TexturePosition[ ErrorPosition.first ][ ErrorPosition.second ].x + TextureWidth &&
+        y > TexturePosition[ ErrorPosition.first ][ ErrorPosition.second ].y &&
+        y < TexturePosition[ ErrorPosition.first ][ ErrorPosition.second ].y + TextureHeight 
+    )
     {
-        for(int j=0;j<9;++j)
+        if( Breaked.count( ErrorPosition ) )
         {
-            if( x > TexturePosition[i][j].x && x < TexturePosition[i][j].x + TextureWidth && y > TexturePosition[i][j].y && y < TexturePosition[i][j].y + TextureHeight )
-            {
-                if( !Breaked.count( { i, j } ) )
-                {
-                    Answer[i][j] = 0;
-                    Breaked.insert( { i, j } );
-                    Mix_PlayChannel( 1, Chunks[1], 0 );
-                }
-                return;
-            }
+            SDL_Log("Break same position!\n");
+            return false;
         }
+        Answer[ ErrorPosition.first ][ ErrorPosition.second ] = 0;
+        Breaked.insert( ErrorPosition );
+        Mix_PlayChannel( 1, Chunks[1], 0 );
+        return true;
     }
-
-    SDL_Log("Wrong mouse position!\n");
-    return;
+    else
+    {
+        Mix_PlayChannel( 0, Chunks[0], 0 );
+        return false;
+    }
 }
 
 void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_AudioDeviceID &Audio, vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )

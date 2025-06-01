@@ -1,4 +1,4 @@
-# Compiler settings (console可改為windows)
+# Compiler settings (windows可改為console，console方便debug)
 CXX = g++ --std=c++17
 CXXFLAGS = -w -Wl,-subsystem,console
 
