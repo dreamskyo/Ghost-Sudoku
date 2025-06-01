@@ -150,7 +150,7 @@ bool LoadAllAudios( vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
         }
     }
 
-    for(int i=0;i<0;++i)
+    for(int i=0;i<5;++i)
     {
         Chunks[i] = Mix_LoadWAV( ChunkPath[i].c_str() );
         if( Chunks[i] == nullptr )
@@ -162,6 +162,37 @@ bool LoadAllAudios( vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
     return true;
 }
 
+void MouseClick( vector<vector<SDL_FRect>> &TexturePosition, vector<vector<int>> &Answer, set<pair<int,int>> &Breaked, vector<Mix_Chunk*> &Chunks )
+{
+    float x = -1.f, y = -1.f;
+    SDL_GetMouseState( &x, &y );
+    if( x < 0 || y < 0 || x > ScreenWidth || y > ScreenHeight )
+    {
+        SDL_Log("Out of screen!\n");
+        return;
+    }
+
+    for(int i=0;i<9;++i)
+    {
+        for(int j=0;j<9;++j)
+        {
+            if( x > TexturePosition[i][j].x && x < TexturePosition[i][j].x + TextureWidth && y > TexturePosition[i][j].y && y < TexturePosition[i][j].y + TextureHeight )
+            {
+                if( !Breaked.count( { i, j } ) )
+                {
+                    Answer[i][j] = 0;
+                    Breaked.insert( { i, j } );
+                    Mix_PlayChannel( 1, Chunks[1], 0 );
+                }
+                return;
+            }
+        }
+    }
+
+    SDL_Log("Wrong mouse position!\n");
+    return;
+}
+
 void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_AudioDeviceID &Audio, vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks )
 {
     for(int i=0;i<2;++i)
@@ -170,7 +201,7 @@ void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_
         Musics[i] = nullptr;
     }
 
-    for(int i=0;i<0;++i)
+    for(int i=0;i<5;++i)
     {
         Mix_FreeChunk( Chunks[i] );
         Chunks[i] = nullptr;

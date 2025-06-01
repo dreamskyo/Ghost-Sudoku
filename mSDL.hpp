@@ -6,6 +6,7 @@
 #include <SDL3_mixer/SDL_mixer.h>
 #include <vector>
 #include <string>
+#include <set>
 using namespace std;
 
 enum color{
@@ -47,8 +48,13 @@ const vector<string> MusicPath{
     "element/WhosThere.mp3"
 };
 const vector<string> ChunkPath{
-
+    "element/putglass.wav",
+    "element/breakglass.wav",
+    "element/clock.wav",
+    "element/door1.wav",
+    "element/door2.wav"
 };
+
 class mSDL
 {
     
@@ -71,7 +77,8 @@ public:
 bool InitWindow( SDL_Window* &Window, SDL_Renderer* &Renderer );
 bool InitAudio( SDL_AudioDeviceID &Audio );
 bool LoadAllPNGS( mSDL &SDL_Object, SDL_Renderer* &Renderer );
-bool LoadAllAudios( vector<Mix_Music*> &musics, vector<Mix_Chunk*> &chunks );
+bool LoadAllAudios( vector<Mix_Music*> &musics, vector<Mix_Chunk*> &Chunks );
+void MouseClick( vector<vector<SDL_FRect>> &TexturePosition, vector<vector<int>> &Answer, set<pair<int,int>> &Breaked, vector<Mix_Chunk*> &Chunks );
 void Close( mSDL &SDL_Object, SDL_Window* &Window, SDL_Renderer* &Renderer, SDL_AudioDeviceID &Audio, vector<Mix_Music*> &Musics, vector<Mix_Chunk*> &Chunks );
 
 #endif
