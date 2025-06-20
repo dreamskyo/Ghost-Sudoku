@@ -102,17 +102,15 @@ int main( int argc, char* args[0] )
             Answer[b.first][b.second] = 0;
         }
 
-        if( NowError < 81 )
+        if( NowError <= 88 )
         {
             ErrorPosition = { NextError[ NowError ] / 10, NextError[ NowError ] % 10 };
             ++NowError;
+            int t = Answer[ ErrorPosition.first ][ ErrorPosition.second ];
+            while( Answer[ ErrorPosition.first ][ ErrorPosition.second ] == t ){
+                Answer[ ErrorPosition.first ][ ErrorPosition.second ] = rand()%9+1;
+            }
         }
-
-        int t = Answer[ ErrorPosition.first ][ ErrorPosition.second ];
-        while( Answer[ ErrorPosition.first ][ ErrorPosition.second ] == t ){
-            Answer[ ErrorPosition.first ][ ErrorPosition.second ] = rand()%9+1;
-        }
-
         while( quit == false && correct == false )
         {
             while( SDL_PollEvent( &e ) )

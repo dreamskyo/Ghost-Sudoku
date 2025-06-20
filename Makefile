@@ -1,6 +1,6 @@
 # Compiler settings (windows可改為console，console方便debug)
 CXX = g++ --std=c++17
-CXXFLAGS = -w -Wl,-subsystem,console
+CXXFLAGS = -w -Wl,-subsystem,windows
 
 # SDL paths (請確認路徑中無中文)(mixer的git-hash: daf0503)
 SDL_INCLUDE = -I local/SDL3-3.2.12/x86_64-w64-mingw32/include -I local/SDL3_image-3.2.4/x86_64-w64-mingw32/include -I local/SDL3_mixer/include
