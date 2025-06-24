@@ -97,12 +97,7 @@ int main( int argc, char* args[0] )
         }
         bool correct = false;
 
-        for( pair<int,int> b : Breaked )
-        {
-            Answer[b.first][b.second] = 0;
-        }
-
-        if( NowError <= 88 )
+        if( NowError <= 81 )
         {
             ErrorPosition = { NextError[ NowError ] / 10, NextError[ NowError ] % 10 };
             ++NowError;
@@ -111,6 +106,13 @@ int main( int argc, char* args[0] )
                 Answer[ ErrorPosition.first ][ ErrorPosition.second ] = rand()%9+1;
             }
         }
+
+        for( pair<int,int> b : Breaked )
+        {
+            Answer[b.first][b.second] = 0;
+        }
+
+        SDL_Log( "Now : %d P: %d %d\n", NowError, ErrorPosition.first, ErrorPosition.second );
         while( quit == false && correct == false )
         {
             while( SDL_PollEvent( &e ) )
@@ -120,7 +122,11 @@ int main( int argc, char* args[0] )
                     quit = true;
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                    correct = MouseClick( TexturePosition, ErrorPosition, Answer, Breaked, Chunks );
+                    if( !correct ){
+                        correct = MouseClick( TexturePosition, ErrorPosition, Answer, Breaked, Chunks );
+                    }else{
+                        SDL_Log("滑鼠事件過多!\n");
+                    }
                     break;
                 }
             }
